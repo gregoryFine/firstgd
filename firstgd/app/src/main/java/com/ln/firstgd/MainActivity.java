@@ -3,6 +3,7 @@ package com.ln.firstgd;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
@@ -16,8 +17,10 @@ import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.HeatmapTileProvider;
 import com.amap.api.maps.model.LatLng;
-import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.TileOverlayOptions;
+import com.ln.firstgd.listener.OnMarkerListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -27,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
 
     private MapView mapView;
     private AMap aMap;
+
+
 
     //声明AMapLocationClient类对象，定位发起端
     private AMapLocationClient mLocationClient = null;
@@ -150,6 +155,13 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
                     double x = aMapLocation.getLatitude();
                     // 得到经度和纬度，绘制热力图
                     drawHeatMap(y, x, aMap);
+                    // 绘制点标记
+                    createPoint(y, x, aMapLocation.getStreet());
+
+                    // 设置标记点点击监听
+                    OnMarkerListener kLister = new OnMarkerListener();
+                    aMap.setOnMarkerClickListener(kLister);
+
 
                     isFirstLoc = false;
                 }
@@ -162,6 +174,8 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
             }
         }
     }
+
+
 
 
     @Override
@@ -191,6 +205,12 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     }
 
 
+    /**
+     * 根据中心坐标，随机生成点，产生热力图示意
+     * @param y
+     * @param x
+     * @param aMap
+     */
     private void drawHeatMap(double y, double x, AMap aMap) {
         //生成热力点坐标列表
         LatLng[] latlngs = new LatLng[100];
@@ -200,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
             double y_ = 0;
             x_ = Math.random() * 0.5 - 0.25;
             y_ = Math.random() * 0.5 - 0.25;
+
             latlngs[i] = new LatLng(x + x_, y + y_);
         }
 
@@ -219,6 +240,17 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         // 向地图上添加 TileOverlayOptions 类对象
         aMap.addTileOverlay(tileOverlayOptions);
 
+    }
+
+
+    /**
+     * 生成一个标记点，
+     * @param y
+     * @param x
+     */
+    private void createPoint(double y, double x, String streetName){
+        LatLng latLng = new LatLng(x, y);
+        aMap.addMarker(new MarkerOptions().position(latLng).title(streetName).snippet("DefaultMarker"));
     }
 
 
